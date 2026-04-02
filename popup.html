@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #0a0e1a;
+    --surface:     #111827;
+    --border:      #1e2d45;
+    --accent:      #00d4aa;
+    --accent-dim:  rgba(0,212,170,0.12);
+    --danger:      #ff4757;
+    --warn:        #f39c12;
+    --text:        #c9d8e8;
+    --text-dim:    #5a7a96;
+    --mono:        'Share Tech Mono', monospace;
+    --head:        'Rajdhani', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    width: 280px;
+    background: var(--bg);
+    font-family: var(--mono);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  /* CRT scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,212,170,0.012) 2px,
+      rgba(0,212,170,0.012) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(160deg, #0d1b2e 0%, #0a1220 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 13px 14px 11px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .brand-icon {
+    width: 30px; height: 30px;
+    border: 1.5px solid var(--accent);
+    border-radius: 7px;
+    background: var(--accent-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .brand-icon svg {
+    width: 16px; height: 16px;
+  }
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    gap: 3px;
+  }
+  .brand-name {
+    font-family: var(--head);
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2.5px;
+  }
+  .brand-sub {
+    font-size: 8px;
+    color: var(--text-dim);
+    letter-spacing: 1.8px;
+  }
+  .version-badge {
+    margin-left: auto;
+    font-size: 8px;
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+
+  /* ── BODY ── */
+  .body { padding: 13px 13px 11px; }
+
+  /* ── STATUS PANEL ── */
+  .status-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 13px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .status-panel.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 18px var(--accent-dim), inset 0 0 14px var(--accent-dim);
+  }
+  .status-panel.active::after {
+    content: '';
+    position: absolute;
+    top: -10px; right: -10px;
+    width: 70px; height: 70px;
+    background: radial-gradient(circle, var(--accent-dim), transparent 70%);
+    pointer-events: none;
+  }
+  .status-label {
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 7px;
+  }
+  .status-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--head);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--danger);
+    transition: color 0.3s;
+  }
+  .status-value.on { color: var(--accent); }
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .status-dot.on {
+    background: var(--accent);
+    box-shadow: 0 0 7px var(--accent);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.45; }
+  }
+  .status-desc {
+    font-size: 8.5px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    letter-spacing: 0.4px;
+    min-height: 11px;
+  }
+
+  /* ── CONTROL ROW ── */
+  .control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 13px;
+    margin-bottom: 10px;
+  }
+  .control-label {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+  }
+
+  /* Toggle switch */
+  .toggle-wrap {
+    position: relative;
+    width: 52px; height: 26px;
+  }
+  .toggle-wrap input {
+    opacity: 0;
+    width: 0; height: 0;
+    position: absolute;
+  }
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: #1a2535;
+    border: 1px solid #2a3d55;
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+  }
+  .toggle-track::before {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    left: 2px; top: 2px;
+    background: #3a5068;
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.3s, box-shadow 0.3s;
+  }
+  input:checked + .toggle-track {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent-dim);
+  }
+  input:checked + .toggle-track::before {
+    transform: translateX(26px);
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* ── STATS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 11px;
+  }
+  .stat-label {
+    font-size: 7.5px;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-family: var(--head);
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .stat-unit {
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-left: 1px;
+  }
+
+  /* ── LOG PANEL ── */
+  .log-panel {
+    background: #070c16;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 10px;
+    height: 72px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #1e3050 transparent;
+  }
+  .log-line {
+    font-size: 8.5px;
+    line-height: 1.75;
+    letter-spacing: 0.2px;
+  }
+  .log-line .ts  { color: #263d5a; margin-right: 5px; }
+  .log-line.info    .msg { color: var(--text-dim); }
+  .log-line.success .msg { color: var(--accent); }
+  .log-line.warn    .msg { color: var(--warn); }
+  .log-line.error   .msg { color: var(--danger); }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 7px 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-text {
+    font-size: 7.5px;
+    color: #1e3050;
+    letter-spacing: 1px;
+  }
+  .heartbeat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 7.5px;
+    color: #1e3050;
+  }
+  .hb-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #1e3050;
+    transition: background 0.3s;
+  }
+  .hb-dot.active {
+    background: var(--accent);
+    animation: blink 1s infinite;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="8,1 15,8 8,15 1,8" stroke="#00d4aa" stroke-width="1.4"/>
+        <line x1="8" y1="3.5" x2="8" y2="12.5" stroke="#00d4aa" stroke-width="1.4" stroke-linecap="round"/>
+        <line x1="3.5" y1="8" x2="12.5" y2="8" stroke="#00d4aa" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="8" cy="1"  r="1.2" fill="#00d4aa"/>
+        <circle cx="15" cy="8" r="1.2" fill="#00d4aa"/>
+        <circle cx="8" cy="15" r="1.2" fill="#00d4aa"/>
+        <circle cx="1" cy="8"  r="1.2" fill="#00d4aa"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <span class="brand-name">TRC AUTO SENDER</span>
+      <span class="brand-sub">COMPASS ORDER ENGINE</span>
+    </div>
+    <span class="version-badge">v1.0</span>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- Status -->
+  <div class="status-panel" id="statusPanel">
+    <div class="status-label">SYSTEM STATUS</div>
+    <div class="status-value" id="statusValue">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">OFFLINE</span>
+    </div>
+    <div class="status-desc" id="statusDesc">Enable the toggle to start automation</div>
+  </div>
+
+  <!-- Toggle -->
+  <div class="control-row">
+    <span class="control-label">AUTOMATION ENGINE</span>
+    <label class="toggle-wrap">
+      <input type="checkbox" id="toggle">
+      <span class="toggle-track"></span>
+    </label>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-label">BATCHES SENT</div>
+      <div class="stat-value" id="batchCount">0<span class="stat-unit">×</span></div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">SESSION TIME</div>
+      <div class="stat-value" id="sessionTime">00<span class="stat-unit">:00</span></div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="log-panel" id="logPanel">
+    <div class="log-line info">
+      <span class="ts">--:--:--</span><span class="msg">Initializing...</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-text">TRC COMPASS · AUTO SENDER</span>
+  <span class="heartbeat">
+    <span class="hb-dot" id="hbDot"></span>
+    <span id="hbText">IDLE</span>
+  </span>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
