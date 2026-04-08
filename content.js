@@ -40,7 +40,7 @@ async function startAutomation() {
       break
     }
 
-    console.log(`[TRC] Found ${checkboxes.length} order(s). Selecting all...`)
+    console.log(`[TRC] Found ${checkboxes.length/2-1} order(s). Selecting all...`)
 
     // Select all unchecked checkboxes
     checkboxes.forEach(cb => {
